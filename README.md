@@ -4,7 +4,7 @@ Julia package for accessing the [List of Title Word Abbreviations](https://www.i
 
 ## Installation
 
-`] install https://github.com/cjdoris/LTWA.jl` or `Pkg.install("https://github.com/cjdoris/LTWA.jl")`.
+`] install LTWA` or `Pkg.install("LTWA")`.
 
 ## Usage
 
@@ -30,6 +30,7 @@ The list as a vector of tuples `(pat, abbrv, langs)` where:
 * `langs` are the corresponding languages
 
 ## Known limitations and deviations from ISO 4
+(Feel free to open an [issue](https://github.com/cjdoris/LTWA.jl/issues)/PR)
 * We don't always capitalize the first letter of the first word
 * We try to abbreviate every word
 * We don't remove commas or convert periods to commas
