@@ -34,16 +34,15 @@ const blank = (missing, Symbol[])
 const dropset = Set(String["of", "and", "the", "de", "le", "a", "for"])
 const pdropset = Set(String["l'"])
 
-begin
-	@debug "precompiling lists and stuff"
-	empty!(list)
-	empty!(edict)
-	empty!(pdict)
-	empty!(sdict)
-	data = readdlm(open(ltwa_file, enc"UTF-16"), '\t', String, skipstart=1)
+@debug "precompiling lists and stuff"
+empty!(list)
+empty!(edict)
+empty!(pdict)
+empty!(sdict)
+let data = readdlm(open(ltwa_file, enc"UTF-16"), '\t', String, skipstart=1)
 	for (word, _abbrv, _langs) in zip(eachcol(data)...)
 		abbrv = _abbrv=="n.a." ? missing : _abbrv
-		langs = Set(map(Symbol ∘ strip, split(_langs, ',')))
+		langs = Set{Symbol}(map(Symbol, filter(!isempty, map(strip, split(_langs, ',')))))
 		entry = (abbrv, langs)
 		push!(list, (word, entry...))
 		if startswith(word,'-') && endswith(word,'-')
@@ -56,7 +55,6 @@ begin
 			edict[word] = entry
 		end
 	end
-	nothing
 end
 
 struct AbbrvWord
