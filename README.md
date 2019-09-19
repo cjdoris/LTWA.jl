@@ -12,16 +12,22 @@ Julia package for accessing the [List of Title Word Abbreviations](https://www.i
 abbreviate(title :: AbstractString) :: String
 ```
 
-An abbreviated version of `title`.
+An abbreviation of `title`.
 
 ```julia
-LTWA.ltwa_list :: Vector{Tuple{String, Union{Missing, String}, Vector{Symbol}}}
+abbreviateword(word :: AbstractString) :: String
 ```
 
-The LTWA as a vector of tuples `(pat, abbrv, langs)` where:
-* `pat` is the pattern (a word, prefix, suffix or infix, depending on whether it starts or ends with a hyphen)
-* `abbrv` is the abbreviated version, or `missing` if not available (i.e. "n.a." in the text version of the LTWA)
-* `langs` are the associated languages
+An abbreviation of `word`, which is assumed to be a single word.
+
+```julia
+LTWA.list :: Vector{Tuple{String, Union{Missing, String}, Set{Symbol}}}
+```
+
+The list as a vector of tuples `(pat, abbrv, langs)` where:
+* `pat` is the pattern
+* `abbrv` is the abbreviation (possibly `missing`)
+* `langs` are the corresponding languages
 
 ## Known limitations and deviations from ISO 4
 * We don't always capitalize the first letter of the first word

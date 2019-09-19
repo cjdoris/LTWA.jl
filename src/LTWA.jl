@@ -1,3 +1,8 @@
+"""
+An interface to the [List of Title Word Abbreviations](https://www.issn.org/services/online-services/access-to-the-ltwa/).
+
+See [`abbreviate`](@ref), [`abbreviateword`](@ref) and [`list`](@ref).
+"""
 module LTWA
 
 using DelimitedFiles, StringEncodings
@@ -11,36 +16,44 @@ catch
 	error("Package LTWA is not built properly, try rebuilding it and trying again")
 end
 
-const ltwa_list = Vector{Tuple{String,Union{String,Missing},Vector{Symbol}}}()
-const ltwa_edict = Dict{String, Tuple{Union{String,Missing},Vector{Symbol}}}()
-const ltwa_pdict = Dict{String, Tuple{Union{String,Missing}, Vector{Symbol}}}()
-const ltwa_sdict = Dict{String, Tuple{Union{String,Missing}, Vector{Symbol}}}()
-const ltwa_idict = Dict{String, Tuple{Union{String,Missing}, Vector{Symbol}}}()
-const ltwa_blank = (missing, Symbol[])
+"""
+    list :: Vector{Tuple{String, Union{String, Missing}, Set{Symbol}}}
 
-const drop_eset = Set(String["of", "and", "the", "de", "le"])
-const drop_pset = Set(String["l'"])
+The list as a vector of tuples `(pat, abbrv, langs)` where:
+* `pat` is the pattern
+* `abbrv` is the abbreviation (possibly `missing`)
+* `langs` are the corresponding languages
+"""
+const list = Vector{Tuple{String,Union{String,Missing}, Set{Symbol}}}()
+const edict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
+const pdict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
+const sdict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
+const idict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
+const blank = (missing, Symbol[])
+
+const dropset = Set(String["of", "and", "the", "de", "le"])
+const pdropset = Set(String["l'"])
 
 begin
 	@debug "precompiling lists and stuff"
-	empty!(ltwa_list)
-	empty!(ltwa_edict)
-	empty!(ltwa_pdict)
-	empty!(ltwa_sdict)
+	empty!(list)
+	empty!(edict)
+	empty!(pdict)
+	empty!(sdict)
 	data = readdlm(open(ltwa_file, enc"UTF-16"), '\t', String, skipstart=1)
 	for (word, _abbrv, _langs) in zip(eachcol(data)...)
 		abbrv = _abbrv=="n.a." ? missing : _abbrv
-		langs = map(Symbol ∘ strip, split(_langs, ','))
+		langs = Set(map(Symbol ∘ strip, split(_langs, ',')))
 		entry = (abbrv, langs)
-		push!(ltwa_list, (word, entry...))
+		push!(list, (word, entry...))
 		if startswith(word,'-') && endswith(word,'-')
-			ltwa_idict[word[nextind(word,1):prevind(word,end)]] = entry
+			idict[word[nextind(word,1):prevind(word,end)]] = entry
 		elseif startswith(word, '-')
-			ltwa_sdict[word[nextind(word,1):end]] = entry
+			sdict[word[nextind(word,1):end]] = entry
 		elseif endswith(word, '-')
-			ltwa_pdict[word[1:prevind(word,end)]] = entry
+			pdict[word[1:prevind(word,end)]] = entry
 		else
-			ltwa_edict[word] = entry
+			edict[word] = entry
 		end
 	end
 	nothing
@@ -67,11 +80,23 @@ function abbrvstring(ws::AbstractVector{AbbrvWord})
 	join(parts)
 end
 
-function abbreviate(title::AbstractString; opts...)
+"""
+    abbreviate(title::AbstractString) :: String
+
+An abbreviation of `title`.
+"""
+function abbreviate(title::AbstractString; opts...) :: String
 	abbrvstring(map(w -> _abbreviateword(w; opts...), split(title)))
 end
 
-function _abbreviateword(word::AbstractString; dropset=drop_eset)::AbbrvWord
+"""
+    abbreviateword(word::AbstractString) :: String
+
+An abbreviation of `word`, which is assumed to be a single word.
+"""
+abbreviateword(word) = _abbreviateword(word).abbrv
+
+function _abbreviateword(word::AbstractString; dropset=dropset)::AbbrvWord
 	# TODO: remove commas
 	# TODO: change '.' to ',' (except in )
 	# TODO: repeat the below with preceding/trailing punctuation removed
@@ -98,35 +123,35 @@ function abbreviateword_part(word::AbstractString)
 	missing
 end
 
-function abbreviateword_exact(word::AbstractString, dict::Dict=ltwa_edict)
-	a = get(dict, word, ltwa_blank)[1]
+function abbreviateword_exact(word::AbstractString, dict::Dict=edict)
+	a = get(dict, word, blank)[1]
 	a === missing || return mkabbrv(a)
 	missing
 end
 
-function abbreviateword_prefix(word::AbstractString, dict::Dict=ltwa_pdict)
+function abbreviateword_prefix(word::AbstractString, dict::Dict=pdict)
 	i = lastindex(word)
 	iend = firstindex(word)
 	while i ≥ iend
-		a = get(dict, word[iend:i], ltwa_blank)[1]
+		a = get(dict, word[iend:i], blank)[1]
 		a === missing || return mkabbrv(a, suffix=word[nextind(word,i):end])
 		i = prevind(word, i)
 	end
 	missing
 end
 
-function abbreviateword_suffix(word::AbstractString, dict::Dict=ltwa_sdict)
+function abbreviateword_suffix(word::AbstractString, dict::Dict=sdict)
 	i = firstindex(word)
 	iend = lastindex(word)
 	while i ≤ iend
-		a = get(dict, word[i:iend], ltwa_blank)[1]
+		a = get(dict, word[i:iend], blank)[1]
 		a === missing || return mkabbrv(a, prefix=word[1:prevind(word,i)])
 		i = nextind(word, i)
 	end
 	missing
 end
 
-function abbreviateword_infix(word::AbstractString, dict::Dict=ltwa_idict)
+function abbreviateword_infix(word::AbstractString, dict::Dict=idict)
 	for (w,(a,_)) in dict
 		ii = findlast(w, word)
 		ii === nothing || return mkabbrv(a, prefix=word[1:prevind(word,ii.start)], suffix=word[nextind(word,ii.stop):end])
