@@ -29,7 +29,7 @@ const edict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
 const pdict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
 const sdict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
 const idict = Dict{String, Tuple{Union{String,Missing}, Set{Symbol}}}()
-const blank = (missing, Symbol[])
+const blank = (missing, Set{Symbol}())
 
 const dropset = Set(String["of", "and", "the", "de", "le", "a", "for"])
 const pdropset = Set(String["l'"])
