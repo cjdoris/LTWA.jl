@@ -29,6 +29,14 @@ The list as a vector of tuples `(pat, abbrv, langs)` where:
 * `abbrv` is the abbreviation (possibly `missing`)
 * `langs` are the corresponding languages
 
+## Examples
+```julia
+julia> using LTWA
+
+julia> abbreviate("Journal of Statistical Software")
+"J. Stat. Softw."
+```
+
 ## Known limitations and deviations from ISO 4
 (Feel free to open an [issue](https://github.com/cjdoris/LTWA.jl/issues)/PR)
 * We don't always capitalize the first letter of the first word
