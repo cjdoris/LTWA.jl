@@ -10,10 +10,10 @@ using DelimitedFiles, StringEncodings
 export abbreviate
 
 try
-	include("../deps/deps.jl")
+	include(joinpath(@__DIR__, "..", "deps", "deps.jl"))
 	@assert @isdefined ltwa_file
 catch
-	error("Package LTWA is not built properly, try rebuilding it and trying again")
+	error("Package LTWA not installed properly, run Pkg.build(\"LTWA\") and try again")
 end
 
 """
@@ -35,10 +35,6 @@ const dropset = Set(String["of", "and", "the", "de", "le", "a", "for"])
 const pdropset = Set(String["l'"])
 
 @debug "precompiling lists and stuff"
-empty!(list)
-empty!(edict)
-empty!(pdict)
-empty!(sdict)
 let data = readdlm(open(ltwa_file, enc"UTF-16"), '\t', String, skipstart=1)
 	for (word, _abbrv, _langs) in zip(eachcol(data)...)
 		abbrv = _abbrv=="n.a." ? missing : _abbrv
