@@ -1,11 +1,12 @@
 name = "LTWA"
 uuid = "a3b798af-b683-4007-b74f-b9136125839e"
 authors = ["Christopher Doris <github.com/cjdoris>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 StringEncodings = "69024149-9ee7-55f6-a4c4-859efe599b68"
 
 [compat]
-julia = "1"
+julia = "1.3"
